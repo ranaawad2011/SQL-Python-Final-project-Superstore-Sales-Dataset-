@@ -1,0 +1,134 @@
+CREATE DATABASE SuperstoreDB;
+GO
+USE SuperstoreDB;
+GO
+
+/* ===================== TABLES ===================== */
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100),
+    Segment VARCHAR(50),
+    Region VARCHAR(50)
+);
+
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(150),
+    Category VARCHAR(50),
+    SubCategory VARCHAR(50),
+    Price DECIMAL(10,2)
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    OrderDate DATE,
+    CustomerID INT,
+    ProductID INT,
+    Sales DECIMAL(10,2),
+    Quantity INT,
+    Discount DECIMAL(5,2),
+    Profit DECIMAL(10,2),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+/* ===================== INSERT 20 EACH ===================== */
+
+/* Customers (20) */
+INSERT INTO Customers VALUES
+(1,'Ahmed Ali','Consumer','East'),
+(2,'Mona Hassan','Corporate','West'),
+(3,'Omar Salem','Home Office','South'),
+(4,'Sara Nabil','Consumer','Central'),
+(5,'Khaled Said','Corporate','East'),
+(6,'Nour Adel','Consumer','West'),
+(7,'Youssef Ibrahim','Corporate','South'),
+(8,'Huda Mahmoud','Home Office','Central'),
+(9,'Mostafa Ahmed','Consumer','East'),
+(10,'Aya Samir','Corporate','West'),
+(11,'Hany Fathy','Consumer','South'),
+(12,'Salma Tarek','Home Office','Central'),
+(13,'Tamer Mohamed','Consumer','East'),
+(14,'Rania Adel','Corporate','West'),
+(15,'Hossam Gamal','Consumer','South'),
+(16,'Doaa Khalil','Home Office','Central'),
+(17,'Marwan Ashraf','Consumer','East'),
+(18,'Reem Magdy','Corporate','West'),
+(19,'Islam Zaki','Consumer','South'),
+(20,'Mayar Emad','Home Office','Central');
+
+/* Products (20) */
+INSERT INTO Products VALUES
+(1,'Laptop','Technology','Computers',8000),
+(2,'Mouse','Technology','Accessories',150),
+(3,'Printer','Technology','Machines',3500),
+(4,'Desk','Furniture','Tables',2000),
+(5,'Chair','Furniture','Chairs',1200),
+(6,'Bookcase','Furniture','Storage',1800),
+(7,'Binder','Office Supplies','Storage',50),
+(8,'Paper','Office Supplies','Paper',30),
+(9,'Pen','Office Supplies','Writing',20),
+(10,'Monitor','Technology','Accessories',3000),
+(11,'Tablet','Technology','Devices',5000),
+(12,'Keyboard','Technology','Accessories',200),
+(13,'Phone','Technology','Devices',6000),
+(14,'Lamp','Furniture','Lighting',500),
+(15,'Cabinet','Furniture','Storage',2500),
+(16,'Notebook','Office Supplies','Paper',40),
+(17,'Headphones','Technology','Accessories',700),
+(18,'Router','Technology','Networking',1200),
+(19,'Whiteboard','Office Supplies','Boards',800),
+(20,'Scanner','Technology','Machines',4000);
+
+/* Orders (20) */
+INSERT INTO Orders VALUES
+(1,'2024-01-10',1,1,8000,1,0.10,500),
+(2,'2024-01-15',2,2,300,2,0.05,50),
+(3,'2024-02-01',3,4,2000,1,0.00,300),
+(4,'2024-02-10',4,5,2400,2,0.10,200),
+(5,'2024-03-05',5,3,3500,1,0.15,400),
+(6,'2024-03-20',6,7,250,5,0.00,80),
+(7,'2024-04-01',7,8,300,10,0.05,60),
+(8,'2024-04-15',8,9,200,10,0.00,70),
+(9,'2024-05-01',9,10,3000,1,0.10,350),
+(10,'2024-05-10',10,11,5000,1,0.20,600),
+(11,'2024-06-01',11,12,400,2,0.00,90),
+(12,'2024-06-15',12,13,6000,1,0.10,500),
+(13,'2024-07-01',13,14,500,1,0.05,100),
+(14,'2024-07-10',14,15,2500,1,0.00,350),
+(15,'2024-08-01',15,16,200,5,0.00,75),
+(16,'2024-08-10',16,17,700,1,0.10,120),
+(17,'2024-09-01',17,18,1200,1,0.05,150),
+(18,'2024-09-15',18,19,800,1,0.00,110),
+(19,'2024-10-01',19,20,4000,1,0.15,450),
+(20,'2024-10-15',20,6,1800,1,0.10,200);
+
+/* ===================== QUERIES ===================== */
+
+-- إجمالي المبيعات
+SELECT SUM(Sales) AS TotalSales FROM Orders;
+
+-- إجمالي الربح
+SELECT SUM(Profit) AS TotalProfit FROM Orders;
+
+-- المبيعات حسب الفئة
+SELECT p.Category, SUM(o.Sales) AS TotalSales
+FROM Orders o
+JOIN Products p ON o.ProductID = p.ProductID
+GROUP BY p.Category;
+
+-- أعلى 5 منتجات مبيعًا
+SELECT TOP 5 p.ProductName, SUM(o.Sales) AS TotalSales
+FROM Orders o
+JOIN Products p ON o.ProductID = p.ProductID
+GROUP BY p.ProductName
+ORDER BY TotalSales DESC;
+
+-- ترتيب العملاء حسب الربح
+SELECT c.CustomerName,
+       SUM(o.Profit) AS TotalProfit,
+       DENSE_RANK() OVER (ORDER BY SUM(o.Profit) DESC) AS RankProfit
+FROM Orders o
+JOIN Customers c ON o.CustomerID = c.CustomerID
+GROUP BY c.CustomerName;
